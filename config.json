@@ -1,0 +1,6 @@
+{
+  "naveoSocket": "naveo.local",
+  "naveoHost": "tcp://naveo.local:2376",
+  "logFilePath": "/tmp/com.naveo.portkit.log",
+  "targetHost": "localhost"
+}
