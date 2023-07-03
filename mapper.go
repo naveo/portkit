@@ -8,6 +8,12 @@ import (
 )
 
 func PortMapper(id, port string) {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Printf("unprivileged bind ports lower than 1024 require privilege escalation")
+		}
+	}()
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -20,15 +26,18 @@ func PortMapper(id, port string) {
 	defer listen.Close()
 
 	go func() {
-		select {
-		case <-ctx.Done():
-			return
-		default:
-			hostConn, err := listen.Accept()
-			if err != nil {
-				log.Printf("stop listening on port %v", port)
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				hostConn, err := listen.Accept()
+				if err != nil {
+					log.Printf("stop listening on port %v", port)
+				}
+				go handleConnection(ctx, hostConn, port)
 			}
-			go handleConnection(ctx, hostConn, port)
+
 		}
 
 	}()
